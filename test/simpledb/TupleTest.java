@@ -3,6 +3,7 @@ package simpledb;
 import static org.junit.Assert.assertEquals;
 import junit.framework.JUnit4TestAdapter;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import simpledb.systemtest.SimpleDbTestBase;
@@ -41,6 +42,7 @@ public class TupleTest extends SimpleDbTestBase {
     /**
      * Unit test for Tuple.getRecordId() and Tuple.setRecordId()
      */
+    @Ignore // don't forget to remove !!!
     @Test public void modifyRecordId() {
         Tuple tup1 = new Tuple(Utility.getTupleDesc(1));
         HeapPageId pid1 = new HeapPageId(0,0);
