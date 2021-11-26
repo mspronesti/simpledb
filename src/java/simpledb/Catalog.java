@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Catalog keeps track of all available tables in the database and their
@@ -13,17 +12,49 @@ import java.util.concurrent.ConcurrentHashMap;
  * For now, this is a stub catalog that must be populated with tables by a
  * user program before it can be used -- eventually, this should be converted
  * to a catalog that reads a catalog table from disk.
- * 
+ *
  * @Threadsafe
  */
 public class Catalog {
+
+    public static class Table{
+
+        private final DbFile file;
+        private final String name;
+        private final String pkeyField;
+
+        Table(DbFile file, String name, String pkeyField){
+            this.file = file;
+            this.name = name;
+            this.pkeyField = pkeyField;
+        }
+
+        public DbFile getDbFile() {
+            return file;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getPkeyField() {
+            return pkeyField;
+        }
+    }
+
+    private final Map<Integer, Table> tables;
+    private final Map<String, Integer> nameIds; //avoid to have Table as value two times
 
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
+
+
     public Catalog() {
         // some code goes here
+        tables = new HashMap<>();
+        nameIds = new HashMap<>();
     }
 
     /**
@@ -37,6 +68,16 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
+        if(name != null /*&& file!=null(?)*/){
+            Table t = new Table(file, name, pkeyField);
+            Integer tableId = file.getId();
+            if(nameIds.containsKey(name)) //if is already present
+                tables.remove(nameIds.get(name));
+            tables.put(tableId, t);
+            nameIds.put(name, tableId);
+        }
+
+
     }
 
     public void addTable(DbFile file, String name) {
@@ -60,7 +101,9 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         // some code goes here
-        return 0;
+        if(!nameIds.containsKey(name))
+            throw new NoSuchElementException();
+        return nameIds.get(name);
     }
 
     /**
@@ -71,7 +114,9 @@ public class Catalog {
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        if(!tables.containsKey(tableid))
+            throw new NoSuchElementException();
+        return tables.get(tableid).getDbFile().getTupleDesc();
     }
 
     /**
@@ -82,29 +127,34 @@ public class Catalog {
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
         // some code goes here
-        return null;
+        if(!tables.containsKey(tableid))
+            throw new NoSuchElementException();
+        return tables.get(tableid).getDbFile();
     }
 
     public String getPrimaryKey(int tableid) {
         // some code goes here
-        return null;
+        return tables.get(tableid).getPkeyField();
     }
 
     public Iterator<Integer> tableIdIterator() {
         // some code goes here
-        return null;
+        return nameIds.values().iterator();
     }
 
     public String getTableName(int id) {
         // some code goes here
-        return null;
+        return tables.get(id).getName();
     }
-    
+
     /** Delete all tables from the catalog */
     public void clear() {
         // some code goes here
+        tables.clear();
+        nameIds.clear();
+
     }
-    
+
     /**
      * Reads the schema from a file and creates the appropriate tables in the database.
      * @param catalogFile
@@ -114,7 +164,7 @@ public class Catalog {
         String baseFolder=new File(new File(catalogFile).getAbsolutePath()).getParent();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File(catalogFile)));
-            
+
             while ((line = br.readLine()) != null) {
                 //assume line is of the format name (field type, field type, ...)
                 String name = line.substring(0, line.indexOf("(")).trim();
