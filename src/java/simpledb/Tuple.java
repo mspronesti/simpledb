@@ -23,7 +23,7 @@ public class Tuple implements Serializable {
      * It's a "normal" array as the size is already
      * known, hence no reason to use Collections
      */
-    private final Field[] fields;
+    private Field[] fields;
     /**
      * unique id for the tuple
      */
@@ -37,8 +37,11 @@ public class Tuple implements Serializable {
      */
     public Tuple(TupleDesc td) {
         // some code goes here
-        resetTupleDesc(td);
-        fields = new Field[td.numFields()];
+        if (td !=null && td.numFields()>=1) { //must be a valid TupleDesc with one field at least
+            resetTupleDesc(td);
+            fields = new Field[td.numFields()];
+        }
+
     }
 
     /**
