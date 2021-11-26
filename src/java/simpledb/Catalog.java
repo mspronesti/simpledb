@@ -17,18 +17,28 @@ import java.util.*;
  */
 public class Catalog {
 
-    public record Table(DbFile file, String name, String pkeyField) {
+    public static class Table{
+
+        private final DbFile file;
+        private final String name;
+        private final String pkeyField;
+
+        Table(DbFile file, String name, String pkeyField){
+            this.file = file;
+            this.name = name;
+            this.pkeyField = pkeyField;
+        }
 
         public DbFile getDbFile() {
-            return this.file;
+            return file;
         }
 
         public String getName() {
-            return this.name;
+            return name;
         }
 
         public String getPkeyField() {
-            return this.pkeyField;
+            return pkeyField;
         }
     }
 
