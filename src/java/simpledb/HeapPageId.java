@@ -75,7 +75,7 @@ public class HeapPageId implements PageId {
      *  constructors.
      */
     public int[] serialize() {
-        int data[] = new int[2];
+        int[] data = new int[2];
 
         data[0] = getTableId();
         data[1] = getPageNumber();
