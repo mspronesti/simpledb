@@ -81,6 +81,8 @@ public class Tuple implements Serializable {
         // some code goes here
         if ( i >= 0 && i < fields.length)
             fields[i] =  f;
+        else
+            throw new IllegalArgumentException();
     }
 
     /**
@@ -91,7 +93,10 @@ public class Tuple implements Serializable {
      */
     public Field getField(int i) {
         // some code goes here
-        return i >= 0 && i < fields.length ? fields[i] : null;
+        if (i >=0 && i < fields.length)
+            return fields[i];
+        else
+            throw new IllegalArgumentException();
     }
 
     /**

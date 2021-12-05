@@ -77,6 +77,12 @@ public class TupleDesc implements Serializable {
      */
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
         // some code goes here
+        if (typeAr.length == 0) {
+            throw new IllegalArgumentException("typeAr must contain at least one entry");
+        }
+        if (typeAr.length != fieldAr.length) {
+            throw new IllegalArgumentException("typeAr and fieldAr lengths should match");
+        }
         __tupleDesc(typeAr, fieldAr);
     }
 
@@ -90,6 +96,9 @@ public class TupleDesc implements Serializable {
      */
     public TupleDesc(Type[] typeAr) {
         // some code goes here
+        if (typeAr.length == 0) {
+            throw new IllegalArgumentException("typeAr must contain at least one entry");
+        }
         __tupleDesc(typeAr, new String[typeAr.length]);
     }
 
@@ -147,6 +156,8 @@ public class TupleDesc implements Serializable {
      */
     public int fieldNameToIndex(String name) throws NoSuchElementException {
         // some code goes here
+        if(name == null)
+            throw new NoSuchElementException();
         return IntStream
                 .range(0, TDItems.size())
                 .filter(idx -> {
