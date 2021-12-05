@@ -30,7 +30,6 @@ public class TupleDesc implements Serializable {
             this.fieldName = n;
             this.fieldType = t;
         }
-
         public String toString() {
             return fieldName + "(" + fieldType + ")";
         }
@@ -44,10 +43,11 @@ public class TupleDesc implements Serializable {
          *          true if the object is equal to this TDItem
          */
         public boolean equals (Object o) {
-            return o == null ?
-                    fieldType == null :
-                    o instanceof TDItem && ((TDItem) o).fieldType.equals(fieldType);
-
+            if(this == o)
+                return true;
+            if(fieldType == null || !(o instanceof TDItem))
+                return false;
+            return ((TDItem) o).fieldType.equals(fieldType);
         }
     }
 
@@ -77,11 +77,8 @@ public class TupleDesc implements Serializable {
      */
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
         // some code goes here
-        if (typeAr.length == 0) {
-            throw new IllegalArgumentException("typeAr must contain at least one entry");
-        }
-        if (typeAr.length != fieldAr.length) {
-            throw new IllegalArgumentException("typeAr and fieldAr lengths should match");
+        if (typeAr.length == 0 || typeAr.length != fieldAr.length) {
+            throw new IllegalArgumentException();
         }
         __tupleDesc(typeAr, fieldAr);
     }
@@ -97,7 +94,7 @@ public class TupleDesc implements Serializable {
     public TupleDesc(Type[] typeAr) {
         // some code goes here
         if (typeAr.length == 0) {
-            throw new IllegalArgumentException("typeAr must contain at least one entry");
+            throw new IllegalArgumentException();
         }
         __tupleDesc(typeAr, new String[typeAr.length]);
     }
@@ -224,15 +221,13 @@ public class TupleDesc implements Serializable {
      *            the Object to be compared for equality with this TupleDesc.
      * @return true if the object is equal to this TupleDesc.
      */
-
     public boolean equals(Object o) {
         // some code goes here
-        return o == null ?
-                // if o is null, return TDItems is null (bool)
-                TDItems == null :
-                // if not null, check if it's from class TupleDesc and if it is,
-                // cast to it and actually compare the content
-                o instanceof TupleDesc && __containSameTDItems(this, (TupleDesc)o);
+        if(this == o)
+            return true;
+        if(TDItems==null || !(o instanceof TupleDesc))
+            return false;
+       return  __containSameTDItems(this, (TupleDesc) o);
     }
 
     public int hashCode() {

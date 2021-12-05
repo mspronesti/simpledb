@@ -118,6 +118,7 @@ public class SeqScan implements OpIterator {
             TransactionAbortedException, DbException {
         // some code goes here
         return dbfileIterator.next();
+
     }
 
     public void close() {
