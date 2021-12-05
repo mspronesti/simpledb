@@ -33,14 +33,14 @@ public class HeapFileIterator implements DbFileIterator {
     public boolean hasNext() throws DbException, TransactionAbortedException {
         if (iterator==null)
             return false;
-        else if (iterator.hasNext())
-            return true;
-        else if (currentPageNumber < numPages){
-            advanceToNextPage();
-            return iterator.hasNext();
+
+        while(currentPageNumber < numPages - 1) {
+            if(iterator.hasNext())
+                return true;
+            else
+                advanceToNextPage();
         }
-        else
-            return false;
+        return iterator.hasNext();
     }
 
     /**
@@ -52,15 +52,10 @@ public class HeapFileIterator implements DbFileIterator {
      */
     @Override
     public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
-        if (iterator==null)
-            throw new NoSuchElementException("Iterator was not opened.");
-        if (iterator.hasNext())
+        if (this.hasNext())
             return iterator.next();
-        else if (currentPageNumber < numPages) {
-            advanceToNextPage();
-            return iterator.next();
-        }
-        else throw new NoSuchElementException("There are no tuples left.");
+
+        throw new NoSuchElementException("No tuples left.");
     }
 
     /**
@@ -71,6 +66,7 @@ public class HeapFileIterator implements DbFileIterator {
     public void rewind() throws DbException, TransactionAbortedException {
         if (iterator==null)
             throw new DbException("Iterator was not opened.");
+        close();
         open();
     }
 
@@ -89,7 +85,7 @@ public class HeapFileIterator implements DbFileIterator {
      *  Advances to next page, if any
      */
     public void advanceToNextPage() throws TransactionAbortedException, DbException {
-        currentPageNumber++;
+        ++currentPageNumber;
         currentHPId = new HeapPageId(heapFileId, currentPageNumber);
         currentHP = (HeapPage) Database.getBufferPool().getPage(transactionId, currentHPId, null);
         iterator = currentHP.iterator();

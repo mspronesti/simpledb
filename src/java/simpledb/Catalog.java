@@ -68,7 +68,9 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
-        if(name != null /*&& file!=null(?)*/){
+        if(name == null || pkeyField == null)
+            throw new IllegalArgumentException();
+        else{
             Table t = new Table(file, name, pkeyField);
             Integer tableId = file.getId();
             if(nameIds.containsKey(name)) //if is already present
@@ -101,7 +103,7 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         // some code goes here
-        if(!nameIds.containsKey(name))
+        if(name==null || !nameIds.containsKey(name))
             throw new NoSuchElementException();
         return nameIds.get(name);
     }
@@ -134,6 +136,8 @@ public class Catalog {
 
     public String getPrimaryKey(int tableid) {
         // some code goes here
+        if(!tables.containsKey(tableid))
+            throw new NoSuchElementException();
         return tables.get(tableid).getPkeyField();
     }
 
@@ -144,6 +148,8 @@ public class Catalog {
 
     public String getTableName(int id) {
         // some code goes here
+        if(!tables.containsKey(id))
+            throw new NoSuchElementException();
         return tables.get(id).getName();
     }
 
