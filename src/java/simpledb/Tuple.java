@@ -12,7 +12,22 @@ import java.util.Iterator;
 public class Tuple implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    /**
+     * the actual scheme of this tuple object
+     * see doc https://hrily.github.io/SimpleDB/
+     */
+    private TupleDesc tupleDesc;
 
+    /**
+     * Contains each column's data of the tuple
+     * It's a "normal" array as the size is already
+     * known, hence no reason to use Collections
+     */
+    private final Field[] fields;
+    /**
+     * unique id for the tuple
+     */
+    private static RecordId recordId;
     /**
      * Create a new tuple with the specified schema (type).
      *
@@ -22,6 +37,8 @@ public class Tuple implements Serializable {
      */
     public Tuple(TupleDesc td) {
         // some code goes here
+        resetTupleDesc(td);
+        fields = new Field[td.numFields()];
     }
 
     /**
@@ -29,7 +46,7 @@ public class Tuple implements Serializable {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return tupleDesc;
     }
 
     /**
@@ -38,7 +55,7 @@ public class Tuple implements Serializable {
      */
     public RecordId getRecordId() {
         // some code goes here
-        return null;
+        return recordId;
     }
 
     /**
@@ -49,6 +66,7 @@ public class Tuple implements Serializable {
      */
     public void setRecordId(RecordId rid) {
         // some code goes here
+        recordId = rid;
     }
 
     /**
@@ -61,6 +79,10 @@ public class Tuple implements Serializable {
      */
     public void setField(int i, Field f) {
         // some code goes here
+        if ( i >= 0 && i < fields.length)
+            fields[i] =  f;
+        else
+            throw new IllegalArgumentException();
     }
 
     /**
@@ -71,7 +93,10 @@ public class Tuple implements Serializable {
      */
     public Field getField(int i) {
         // some code goes here
-        return null;
+        if (i >=0 && i < fields.length)
+            return fields[i];
+        else
+            throw new IllegalArgumentException();
     }
 
     /**
@@ -84,7 +109,11 @@ public class Tuple implements Serializable {
      */
     public String toString() {
         // some code goes here
-        throw new UnsupportedOperationException("Implement this");
+        StringBuilder s = new StringBuilder();
+        for ( Field f : fields) {
+            s.append(f.toString()).append("\t");
+        }
+        return s.toString();
     }
 
     /**
@@ -94,7 +123,7 @@ public class Tuple implements Serializable {
     public Iterator<Field> fields()
     {
         // some code goes here
-        return null;
+        return Arrays.asList(fields).iterator();
     }
 
     /**
@@ -103,5 +132,6 @@ public class Tuple implements Serializable {
     public void resetTupleDesc(TupleDesc td)
     {
         // some code goes here
+        tupleDesc = td;
     }
 }
