@@ -33,4 +33,9 @@ jobs:
           ant runtest -Dtest=HeapPageReadTest
           ant runtest -Dtest=HeapFileReadTest
           ant runsystest -Dtest=ScanTest
-
+          ant runtest -Dtest=PredicateTest
+          ant runtest -Dtest=JoinPredicateTest
+          ant runtest -Dtest=FilterTest
+          ant runsystest -Dtest=FilterTest
+          ant runtest -Dtest=JoinTest
+          ant runsystest -Dtest=JoinTest
