@@ -68,7 +68,7 @@ public class QueryPlanVisualizer {
         if (queryPlan instanceof SeqScan) {
             SeqScan s = (SeqScan) queryPlan;
             String tableName = s.getTableName();
-            String alias = s.getTableAlias();
+            String alias = s.getAlias();
 //            TupleDesc td = s.getTupleDesc();
             if (!tableName.equals(alias))
                 alias = " " + alias;
