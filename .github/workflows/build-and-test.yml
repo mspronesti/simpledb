@@ -39,3 +39,7 @@ jobs:
           ant runsystest -Dtest=FilterTest
           ant runtest -Dtest=JoinTest
           ant runsystest -Dtest=JoinTest
+          ant runtest -Dtest=IntegerAggregatorTest
+          ant runtest -Dtest=StringAggregatorTest
+          ant runtest -Dtest=AggregateTest
+          ant runsystest -Dtest=AggregateTest
