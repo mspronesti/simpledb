@@ -10,8 +10,7 @@ public class Join extends Operator {
     private static final long serialVersionUID = 1L;
     private JoinPredicate joinPredicate;
     private OpIterator child1, child2;
-    private TupleIterator tupleIterator;
-    private TupleDesc mergedTd;
+    private Tuple tuple1, tuple2;
 
     /**
      * Constructor. Accepts two children to join and the predicate to join them
@@ -29,6 +28,8 @@ public class Join extends Operator {
         this.joinPredicate = p;
         this.child1 = child1;
         this.child2 = child2;
+        this.tuple1 = null;
+        this.tuple2 = null;
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -64,8 +65,7 @@ public class Join extends Operator {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        mergedTd = TupleDesc.merge(child1.getTupleDesc(), child2.getTupleDesc());
-        return mergedTd;
+        return TupleDesc.merge(child1.getTupleDesc(), child2.getTupleDesc());
     }
 
     public void open() throws DbException, NoSuchElementException,
@@ -74,8 +74,6 @@ public class Join extends Operator {
         child1.open();
         child2.open();
         super.open();
-        tupleIterator = nestedLoopsJoin();
-        tupleIterator.open();
     }
 
     public void close() {
@@ -83,14 +81,12 @@ public class Join extends Operator {
         child1.close();
         child2.close();
         super.close();
-        tupleIterator.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
         child1.rewind();
         child2.rewind();
-        tupleIterator.rewind();
     }
 
     /**
@@ -113,8 +109,31 @@ public class Join extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
-        if(tupleIterator.hasNext())
-            return tupleIterator.next();
+        while(child1.hasNext() || tuple1 != null){
+            if(tuple1 == null)
+                tuple1 = child1.next();
+            while(child2.hasNext()){
+
+                tuple2 = child2.next();
+                if(joinPredicate.filter(tuple1,tuple2)){
+                    Tuple mergedTuple = new Tuple(getTupleDesc());
+                    int j = 0;
+                    for(int i = 0; i < mergedTuple.getTupleDesc().numFields(); i++){
+
+                        if(i < tuple1.getTupleDesc().numFields())
+                            mergedTuple.setField(i, tuple1.getField(i));
+
+                        else{
+                            mergedTuple.setField(i, tuple2.getField(j));
+                            j ++;
+                        }
+                    }
+                    return mergedTuple;
+                }
+            }
+            child2.rewind();
+            tuple1=null;
+        }
         return null;
     }
 
@@ -135,55 +154,7 @@ public class Join extends Operator {
         }
     }
 
-    /**
-     * Merge two Tuple into one, with td1.numFields + td2.numFields fields,
-     * with the first td1.numFields coming from td1 and the remaining from td2.
-     * @param t1 the first Tuple
-     *
-     * @param t2 the second Tuple
-     * @return the new Tuple
-     */
-    private Tuple mergeTuples(Tuple t1, Tuple t2){
-        int j = 0;
-        int numFields1 = t1.getTupleDesc().numFields();
-        int numFields2 = t2.getTupleDesc().numFields();
-        int totNumFields = numFields1 + numFields2;
-        Tuple mergedTuple = new Tuple(getTupleDesc());
 
-        for(int i = 0; i < totNumFields; i++){
-
-            if(i < numFields1)
-                mergedTuple.setField(i, t1.getField(i));
-
-            else{
-                mergedTuple.setField(i, t2.getField(j));
-                j ++;
-            }
-        }
-        return mergedTuple;
-    }
-
-    /**
-     * Implement nested loops join; each tuple in child1 is merged with
-     * each tuple in child2 if the join predicate is satisfied.
-     * @return a TupleIterator of the resulting merged tuples.
-     */
-    private TupleIterator nestedLoopsJoin() throws TransactionAbortedException, DbException {
-        ArrayList<Tuple> tuplesResult = new ArrayList<>();
-        child1.rewind();
-        while (child1.hasNext()){
-
-            Tuple outer = child1.next();
-            child2.rewind();
-            while (child2.hasNext()){
-
-                Tuple inner = child2.next();
-                if(joinPredicate.filter(outer,inner))
-                    tuplesResult.add(mergeTuples(outer, inner));
-            }
-        }
-        return new TupleIterator(mergedTd, tuplesResult);
-    }
 
 
 }
