@@ -51,7 +51,7 @@ public class SeqScan implements OpIterator {
     /**
      * @return Return the alias of the table this operator scans.
      * */
-    public String getTableAlias()
+    public String getAlias()
     {
         // some code goes here
         return tableAlias;
