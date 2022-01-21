@@ -43,3 +43,6 @@ jobs:
           ant runtest -Dtest=StringAggregatorTest
           ant runtest -Dtest=AggregateTest
           ant runsystest -Dtest=AggregateTest
+          ant runtest -Dtest=HeapPageWriteTest
+          ant runtest -Dtest=HeapFileWriteTest
+          ant runtest -Dtest=BufferPoolWriteTest
