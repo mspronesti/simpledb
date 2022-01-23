@@ -10,13 +10,12 @@ public class RecordId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final PageId pageId;
-    private final int tpn;
-
+    PageId pageId;
+    int tupleNo;
     /**
      * Creates a new RecordId referring to the specified PageId and tuple
      * number.
-     * 
+     *
      * @param pid
      *            the pageid of the page on which the tuple resides
      * @param tupleno
@@ -24,8 +23,8 @@ public class RecordId implements Serializable {
      */
     public RecordId(PageId pid, int tupleno) {
         // some code goes here
-        pageId = pid;
-        tpn = tupleno;
+        this.pageId = pid;
+        this.tupleNo = tupleno;
     }
 
     /**
@@ -33,7 +32,7 @@ public class RecordId implements Serializable {
      */
     public int getTupleNumber() {
         // some code goes here
-        return tpn;
+        return tupleNo;
     }
 
     /**
@@ -47,36 +46,30 @@ public class RecordId implements Serializable {
     /**
      * Two RecordId objects are considered equal if they represent the same
      * tuple.
-     * 
+     *
      * @return True if this and o represent the same tuple
      */
     @Override
     public boolean equals(Object o) {
         // some code goes here
-        // self check
-        if (this == o)
-            return true;
-        // null check
-        if (o == null)
-            return false;
-        // type check and cast
-        if (getClass() != o.getClass())
-            return false;
-        RecordId ri = (RecordId) o;
-        // field comparison
-        return pageId.equals(ri.pageId) && tpn == ri.tpn;
+        if (o instanceof RecordId) {
+            RecordId rid = (RecordId) o;
+            return rid.tupleNo == this.tupleNo && rid.pageId.equals(this.pageId);
+        }
+        return false;
     }
 
     /**
      * You should implement the hashCode() so that two equal RecordId instances
      * (with respect to equals()) have the same hashCode().
-     * 
+     *
      * @return An int that is the same for equal RecordId objects.
      */
     @Override
     public int hashCode() {
         // some code goes here
-        return Integer.parseInt(String.valueOf(pageId.hashCode())+String.valueOf(tpn));
+        return (String.valueOf(pageId.hashCode()) + tupleNo).hashCode();
+
     }
 
 }
