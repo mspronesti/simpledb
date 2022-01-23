@@ -33,7 +33,7 @@ public class Insert extends Operator {
         this.trid = t;
         this.child = child;
         this.tbid = tableId;
-        this.td = new TupleDesc(new Type[]{Type.INT_TYPE}, new String[]{"inserted tuples"});
+        this.td = new TupleDesc(new Type[]{Type.INT_TYPE});
     }
 
     public TupleDesc getTupleDesc() {

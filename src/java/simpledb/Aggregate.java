@@ -163,23 +163,28 @@ public class Aggregate extends Operator {
 	// some code goes here
         Type[] fieldType;
         String[] fieldName;
+        String aggrName = child.getTupleDesc().getFieldName(aField);
 
         if(aField == Aggregator.NO_GROUPING){
             fieldType = new Type[1];
             fieldName = new String[1];
 
             fieldType[0] = child.getTupleDesc().getFieldType(aField);
-            fieldName[0] = nameOfAggregatorOp(operation) + "(" + aggregateFieldName() + ")";
 
+            if(aggrName != null) {
+                fieldName[0] = nameOfAggregatorOp(operation) + "(" + child.getTupleDesc().getFieldName(aField) + ")";
+            }
         } else {
             fieldType = new Type[2];
             fieldName = new String[2];
 
             fieldType[0] = child.getTupleDesc().getFieldType(gField);
-            fieldName[0] = groupFieldName();
+            fieldName[0] = child.getTupleDesc().getFieldName(gField);
 
             fieldType[1] = child.getTupleDesc().getFieldType(aField);
-            fieldName[1] = nameOfAggregatorOp(operation) + "(" + aggregateFieldName() + ")";
+            if(aggrName != null) {
+                fieldName[1] = nameOfAggregatorOp(operation) + "(" + child.getTupleDesc().getFieldName(aField) + ")";
+            }
         }
         return new TupleDesc(fieldType, fieldName);
     }
