@@ -86,7 +86,7 @@ public class HeapPage implements Page {
     private int getHeaderSize() {
         // some code goes here
         //headerBytes = ceiling(tupsPerPage/8)
-        return (getNumTuples() + 8 - 1) / 8;
+        return (getNumTuples() + 7) / 8;
 
     }
 
