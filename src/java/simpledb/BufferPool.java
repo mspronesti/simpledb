@@ -149,6 +149,7 @@ public class BufferPool {
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         // not necessary for lab1
+        // just exploit API to to the job
         ArrayList<Page> pages =  Database.getCatalog()
                 .getDatabaseFile(tableId)
                 .insertTuple(tid, t);
@@ -177,6 +178,7 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
         int tableId = t.getRecordId().getPageId().getTableId();
+        // just exploit API to to the job
         ArrayList<Page> pages = Database.getCatalog()
                 .getDatabaseFile(tableId)
                 .deleteTuple(tid, t);
@@ -195,7 +197,7 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for lab1
-        PageId[] pids = pbp.getPIDs();
+        ArrayList<PageId> pids = pbp.getPIDs();
         for (PageId pid : pids) {
             flushPage(pid);
         }
@@ -223,9 +225,11 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
         Page selectedPage = pbp.get(pid);
-        DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
-        file.writePage(selectedPage);
-        pbp.remove(pid);
+        if (selectedPage.isDirty() != null) {
+            DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
+            file.writePage(selectedPage);
+        }
+        selectedPage.markDirty(false,null);
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -241,18 +245,21 @@ public class BufferPool {
      */
     private synchronized  void evictPage() throws DbException {
         // some code goes here
-        // not necessary for lab1
-        PageId lru = pbp.removeLastRecentlyUsed();
+        // not necessary for
+        PageId lru = pbp.getLastRecentlyUsed();
         try {
             flushPage(lru);
         }
         catch (Exception e) {
             throw new DbException("Flushing page to free space failed");
         }
+        pbp.remove(lru);
     }
 
+    // Implements functionalities of a queue, where least-recently used pages
+    // get returned to main BufferPool class
     private static class PageBufferPool {
-        //Change type of pageBuffer to not store a page twice
+        // Change type of pageBuffer to not store a page twice
         private final int capacity;
         private final ArrayList<PageId> pageBuffer;
         private final ConcurrentHashMap<PageId, Page> pageIdToPage;
@@ -296,8 +303,11 @@ public class BufferPool {
             pageIdToPage.remove(pageBuffer.get(0));
             return pageBuffer.remove(0);
         }
-        public PageId[] getPIDs() {
-            return (PageId[]) pageBuffer.toArray();
+        public PageId getLastRecentlyUsed() {
+            return pageBuffer.get(0);
+        }
+        public ArrayList<PageId> getPIDs() {
+            return pageBuffer;
         }
     }
 
