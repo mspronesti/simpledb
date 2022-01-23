@@ -73,6 +73,8 @@ public class Insert extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
+        // The actual insertion happens all in one time in fetchNext.
+        // Needed in order to compute the output tuple
         if (called)
             return null;
         called = true;

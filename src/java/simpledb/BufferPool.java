@@ -224,6 +224,7 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for lab1
+        // No pages get actually removed fron BP
         Page selectedPage = pbp.get(pid);
         if (selectedPage.isDirty() != null) {
             DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
@@ -246,6 +247,7 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for
+        // Effectuve removal happens when pbp.remove is called
         PageId lru = pbp.getLastRecentlyUsed();
         try {
             flushPage(lru);
@@ -258,6 +260,7 @@ public class BufferPool {
 
     // Implements functionalities of a queue, where least-recently used pages
     // get returned to main BufferPool class
+    // Based on lab1 solution
     private static class PageBufferPool {
         // Change type of pageBuffer to not store a page twice
         private final int capacity;
