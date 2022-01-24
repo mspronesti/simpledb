@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Catalog keeps track of all available tables in the database and their
@@ -17,19 +18,22 @@ import java.util.*;
  */
 public class Catalog {
 
-    public static class Table{
-
+    /**
+     * Constructor.
+     * Creates a new, empty catalog.
+     */
+    private class DbTable {
         private final DbFile file;
         private final String name;
         private final String pkeyField;
 
-        Table(DbFile file, String name, String pkeyField){
+        public DbTable(DbFile file, String name, String pkeyField) {
             this.file = file;
             this.name = name;
             this.pkeyField = pkeyField;
         }
 
-        public DbFile getDbFile() {
+        public DbFile getFile() {
             return file;
         }
 
@@ -42,19 +46,17 @@ public class Catalog {
         }
     }
 
-    private final Map<Integer, Table> tables;
-    private final Map<String, Integer> nameIds; //avoid to have Table as value two times
+    private final ConcurrentHashMap<Integer, DbTable> catalog;
+    private final ConcurrentHashMap<String, Integer> name2IdMap;
 
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
-
-
     public Catalog() {
         // some code goes here
-        tables = new HashMap<>();
-        nameIds = new HashMap<>();
+        catalog = new ConcurrentHashMap<>();
+        name2IdMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -68,18 +70,8 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
-        if(name == null || pkeyField == null)
-            throw new IllegalArgumentException();
-        else{
-            Table t = new Table(file, name, pkeyField);
-            Integer tableId = file.getId();
-            if(nameIds.containsKey(name)) //if is already present
-                tables.remove(nameIds.get(name));
-            tables.put(tableId, t);
-            nameIds.put(name, tableId);
-        }
-
-
+        catalog.put(file.getId(), new DbTable(file, name, pkeyField));
+        name2IdMap.put(name, file.getId());
     }
 
     public void addTable(DbFile file, String name) {
@@ -103,9 +95,13 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         // some code goes here
-        if(name==null || !nameIds.containsKey(name))
-            throw new NoSuchElementException();
-        return nameIds.get(name);
+        if (name != null) {
+            Integer tid = name2IdMap.get(name);
+            if (tid != null) {
+                return tid;
+            }
+        }
+        throw new NoSuchElementException();
     }
 
     /**
@@ -116,9 +112,7 @@ public class Catalog {
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
         // some code goes here
-        if(!tables.containsKey(tableid))
-            throw new NoSuchElementException();
-        return tables.get(tableid).getDbFile().getTupleDesc();
+        return getDatabaseFile(tableid).getTupleDesc();
     }
 
     /**
@@ -129,36 +123,33 @@ public class Catalog {
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
         // some code goes here
-        if(!tables.containsKey(tableid))
-            throw new NoSuchElementException();
-        return tables.get(tableid).getDbFile();
+        DbTable table = catalog.get(tableid);
+        if (table != null) {
+            return table.getFile();
+        }
+        throw new NoSuchElementException();
     }
 
     public String getPrimaryKey(int tableid) {
         // some code goes here
-        if(!tables.containsKey(tableid))
-            throw new NoSuchElementException();
-        return tables.get(tableid).getPkeyField();
+        return catalog.get(tableid).getPkeyField();
     }
 
     public Iterator<Integer> tableIdIterator() {
         // some code goes here
-        return nameIds.values().iterator();
+        return name2IdMap.values().iterator();
     }
 
     public String getTableName(int id) {
         // some code goes here
-        if(!tables.containsKey(id))
-            throw new NoSuchElementException();
-        return tables.get(id).getName();
+        return catalog.get(id).getName();
     }
 
     /** Delete all tables from the catalog */
     public void clear() {
         // some code goes here
-        tables.clear();
-        nameIds.clear();
-
+        catalog.clear();
+        name2IdMap.clear();
     }
 
     /**

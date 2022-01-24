@@ -3,9 +3,8 @@ package simpledb;
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {
 
-    private final int tid;
-    private final int pgn;
-
+    private final int tableId;
+    private final int pgNo;
     /**
      * Constructor. Create a page id structure for a specific page of a
      * specific table.
@@ -15,14 +14,14 @@ public class HeapPageId implements PageId {
      */
     public HeapPageId(int tableId, int pgNo) {
         // some code goes here
-        tid = tableId;
-        pgn = pgNo;
+        this.tableId = tableId;
+        this.pgNo = pgNo;
     }
 
     /** @return the table associated with this PageId */
     public int getTableId() {
         // some code goes here
-        return tid;
+        return tableId;
     }
 
     /**
@@ -31,7 +30,7 @@ public class HeapPageId implements PageId {
      */
     public int getPageNumber() {
         // some code goes here
-        return pgn;
+        return pgNo;
     }
 
     /**
@@ -42,7 +41,7 @@ public class HeapPageId implements PageId {
      */
     public int hashCode() {
         // some code goes here
-        return String.valueOf(tid).concat(String.valueOf(pgn)).hashCode();
+        return (String.valueOf(tableId) + pgNo).hashCode();
     }
 
     /**
@@ -54,18 +53,10 @@ public class HeapPageId implements PageId {
      */
     public boolean equals(Object o) {
         // some code goes here
-        // self check
-        if (this == o)
-            return true;
-        // null check
-        if (o == null)
-            return false;
-        // type check and cast
-        if (getClass() != o.getClass())
-            return false;
-        HeapPageId hpi = (HeapPageId) o;
-        // field comparison
-        return tid == hpi.tid && pgn == hpi.pgn;
+        if (o instanceof HeapPageId) {
+            return this.tableId == ((HeapPageId) o).getTableId() && this.pgNo == ((HeapPageId) o).getPageNumber();
+        }
+        return false;
     }
 
     /**
@@ -75,7 +66,7 @@ public class HeapPageId implements PageId {
      *  constructors.
      */
     public int[] serialize() {
-        int[] data = new int[2];
+        int data[] = new int[2];
 
         data[0] = getTableId();
         data[1] = getPageNumber();

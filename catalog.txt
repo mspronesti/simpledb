@@ -1,0 +1,2 @@
+student (roll_no int, name string, country string, age int)
+student_course (course_id int, roll_no int)
