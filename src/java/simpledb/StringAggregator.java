@@ -33,7 +33,7 @@ public class StringAggregator implements Aggregator {
         this.gbField=gbfield;
         this.gbFieldType=gbfieldtype;
         this.aField=afield;
-        counts = new HashMap<>();
+        counts = new HashMap<>(); // contains the current count of tuples
 
     }
 

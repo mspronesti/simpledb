@@ -347,7 +347,6 @@ public class HeapPage implements Page {
     private void markSlotUsed(int i, boolean value) {
         // some code goes here
         // not necessary for lab1
-        // TODO: to be commented
         byte offset = (byte) (i % 8);
 
         if (value)
