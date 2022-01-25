@@ -39,10 +39,10 @@ public class IntegerAggregator implements Aggregator {
         this.gbFieldType=gbfieldtype;
         this.aField=afield;
         this.operator=what;
-        minmax = new HashMap<>();
-        counts = new HashMap<>();
-        sums = new HashMap<>();
-        averages = new HashMap<>();
+        minmax = new HashMap<>(); //if operator= min contains the current min value; if operator = max contains the current max value
+        counts = new HashMap<>(); // contains the current count of tuples
+        sums = new HashMap<>(); // contains the current sum of aggregate fields
+        averages = new HashMap<>(); // contains the current average of aggregate fields
     }
 
     /**
@@ -64,15 +64,20 @@ public class IntegerAggregator implements Aggregator {
             groupField = new IntField(Aggregator.NO_GROUPING);
         aggField = tup.getField(aField);
         aFieldName = tup.getTupleDesc().getFieldName(aField);
-        if(!counts.containsKey(groupField))
-            counts.put(groupField, 1);
-        else
-            counts.put(groupField, counts.get(groupField) + 1);
-        if(!sums.containsKey(groupField))
-            sums.put(groupField, aggField.hashCode());
-        else
-            sums.put(groupField, sums.get(groupField) + aggField.hashCode());
-        averages.put(groupField, sums.get(groupField) / counts.get(groupField));
+        if(operator == Op.COUNT || operator == Op.AVG) {
+            if (!counts.containsKey(groupField))
+                counts.put(groupField, 1);
+            else
+                counts.put(groupField, counts.get(groupField) + 1);
+        }
+        if(operator == Op.AVG || operator == Op.SUM) {
+            if (!sums.containsKey(groupField))
+                sums.put(groupField, aggField.hashCode());
+            else
+                sums.put(groupField, sums.get(groupField) + aggField.hashCode());
+        }
+        if(operator == Op.AVG)
+            averages.put(groupField, sums.get(groupField) / counts.get(groupField));
 
 
         switch (operator){
