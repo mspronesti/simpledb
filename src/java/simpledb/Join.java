@@ -12,6 +12,8 @@ public class Join extends Operator {
     private OpIterator child1, child2;
     private Tuple tuple1, tuple2;
 
+    private HashEquiJoin hashEquiJoin = null;
+
     /**
      * Constructor. Accepts two children to join and the predicate to join them
      * on
@@ -30,6 +32,10 @@ public class Join extends Operator {
         this.child2 = child2;
         this.tuple1 = null;
         this.tuple2 = null;
+
+        if (joinPredicate.getOperator().equals(Predicate.Op.EQUALS))
+            // if we're joining on equality
+            hashEquiJoin = new HashEquiJoin(p, child1, child2);
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -71,22 +77,34 @@ public class Join extends Operator {
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         // some code goes here
-        child1.open();
-        child2.open();
+        if (hashEquiJoin != null)
+            hashEquiJoin.open();
+        else {
+            child1.open();
+            child2.open();
+        }
         super.open();
     }
 
     public void close() {
         // some code goes here
-        child1.close();
-        child2.close();
+        if (hashEquiJoin != null)
+            hashEquiJoin.close();
+        else {
+            child1.close();
+            child2.close();
+        }
         super.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
-        child1.rewind();
-        child2.rewind();
+        if (hashEquiJoin != null)
+            hashEquiJoin.rewind();
+        else {
+            child1.rewind();
+            child2.rewind();
+        }
     }
 
     /**
@@ -109,6 +127,11 @@ public class Join extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
+        if (hashEquiJoin != null)
+            // this code is reached in case
+            // of equality operator
+            return hashEquiJoin.fetchNext();
+
         while(child1.hasNext() || tuple1 != null){
             if(tuple1 == null)
                 tuple1 = child1.next();
